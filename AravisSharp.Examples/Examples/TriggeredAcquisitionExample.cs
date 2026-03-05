@@ -32,8 +32,26 @@ public static class TriggeredAcquisitionExample
         camera.SetTrigger("Software");
         Console.WriteLine($"Trigger configured: source={camera.GetTriggerSource()}\n");
 
+        // GigE Vision: negotiate packet size before stream creation
+        if (camera.IsGigEVisionDevice())
+        {
+            try
+            {
+                camera.GvAutoPacketSize();
+                Console.WriteLine($"[GigE] Packet size: {camera.GvGetPacketSize()} bytes");
+            }
+            catch { }
+        }
+
         // Create stream and allocate buffers using the correct payload size
         using var stream = camera.CreateStream();
+
+        // GigE Vision: configure stream socket buffers
+        if (camera.IsGigEVisionDevice())
+        {
+            stream.ConfigureGigEDefaults();
+        }
+
         var payloadSize = camera.GetPayloadSize();
         var (_, _, width, height) = camera.GetRegion();
         Console.WriteLine($"Image: {width}x{height}, payload: {payloadSize} bytes");

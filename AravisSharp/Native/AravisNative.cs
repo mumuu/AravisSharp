@@ -312,6 +312,15 @@ public static class AravisNative
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     public static extern void arv_stream_set_emit_signals(IntPtr stream, bool emitSignals);
 
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern ushort arv_gv_stream_get_port(IntPtr gvStream);
+
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern void arv_gv_stream_get_statistics(
+        IntPtr gvStream,
+        out ulong nResentPackets,
+        out ulong nMissingPackets);
+
     // Buffer operations
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     public static extern IntPtr arv_buffer_new(IntPtr size, IntPtr priv);

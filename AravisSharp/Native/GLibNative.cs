@@ -55,6 +55,54 @@ public static class GLibNative
         }
     }
 
+    // --- GObject property access (libgobject-2.0) ---
+    // g_object_set / g_object_get are variadic C functions.
+    // We declare typed overloads for the signatures we need.
+
+    /// <summary>Sets a single integer property on a GObject.</summary>
+    [DllImport(GObjectLibraryName, CallingConvention = CallingConvention.Cdecl,
+        EntryPoint = "g_object_set")]
+    public static extern void g_object_set_int(IntPtr obj,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string propertyName,
+        int value, IntPtr terminator);
+
+    /// <summary>Sets a single unsigned integer property on a GObject.</summary>
+    [DllImport(GObjectLibraryName, CallingConvention = CallingConvention.Cdecl,
+        EntryPoint = "g_object_set")]
+    public static extern void g_object_set_uint(IntPtr obj,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string propertyName,
+        uint value, IntPtr terminator);
+
+    /// <summary>Sets a single boolean property on a GObject.</summary>
+    [DllImport(GObjectLibraryName, CallingConvention = CallingConvention.Cdecl,
+        EntryPoint = "g_object_set")]
+    public static extern void g_object_set_bool(IntPtr obj,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string propertyName,
+        [MarshalAs(UnmanagedType.Bool)] bool value, IntPtr terminator);
+
+    /// <summary>Gets a single integer property from a GObject.</summary>
+    [DllImport(GObjectLibraryName, CallingConvention = CallingConvention.Cdecl,
+        EntryPoint = "g_object_get")]
+    public static extern void g_object_get_int(IntPtr obj,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string propertyName,
+        out int value, IntPtr terminator);
+
+    /// <summary>Gets a single unsigned integer property from a GObject.</summary>
+    [DllImport(GObjectLibraryName, CallingConvention = CallingConvention.Cdecl,
+        EntryPoint = "g_object_get")]
+    public static extern void g_object_get_uint(IntPtr obj,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string propertyName,
+        out uint value, IntPtr terminator);
+
+    /// <summary>Gets a single boolean property from a GObject.</summary>
+    [DllImport(GObjectLibraryName, CallingConvention = CallingConvention.Cdecl,
+        EntryPoint = "g_object_get")]
+    public static extern void g_object_get_bool(IntPtr obj,
+        [MarshalAs(UnmanagedType.LPUTF8Str)] string propertyName,
+        [MarshalAs(UnmanagedType.Bool)] out bool value, IntPtr terminator);
+
+    // --- Helper methods ---
+
     /// <summary>
     /// Gets the GObject type name for a GObject instance (e.g. "ArvGcInteger", "ArvGcFloat")
     /// </summary>

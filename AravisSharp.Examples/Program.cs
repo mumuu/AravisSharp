@@ -61,6 +61,8 @@ Console.WriteLine("8. Feature browser (comprehensive)");
 Console.WriteLine("9. Simple feature lister (debug)");
 Console.WriteLine("10. Feature overview (detailed)");
 Console.WriteLine("11. Quick feature demo (recommended)");
+Console.WriteLine("12. Multi-camera software-trigger acquisition check");
+Console.WriteLine("13. GigE Vision diagnostic tool");
 Console.WriteLine("0. Exit");
 Console.Write("\nChoice: ");
 
@@ -100,6 +102,12 @@ switch (choice)
         break;
     case "11":
         QuickFeatureDemoExample.Run();
+        break;
+    case "12":
+        MultiCameraSoftwareTriggerCheckExample.Run();
+        break;
+    case "13":
+        GigEDiagnosticExample.Run();
         break;
     case "0":
         return;
@@ -173,6 +181,23 @@ try
     var currentFps = camera.GetFrameRate();
     Console.WriteLine($"Frame Rate: {currentFps:F2} fps\n");
 
+    // --- GigE Vision: negotiate optimal packet size BEFORE creating stream ---
+    if (camera.IsGigEVisionDevice())
+    {
+        Console.WriteLine("[GigE] Detected GigE Vision camera");
+        try
+        {
+            camera.GvAutoPacketSize();
+            var gvPacketSize = camera.GvGetPacketSize();
+            Console.WriteLine($"[GigE] Negotiated packet size: {gvPacketSize} bytes");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[GigE] Warning: Auto packet size failed: {ex.Message}");
+            try { camera.GvSetPacketSize(1500); } catch { }
+        }
+    }
+
     // Configure camera for acquisition
     Console.WriteLine("Configuring camera for acquisition...");
     
@@ -192,23 +217,38 @@ try
     Console.WriteLine($"Set exposure time to 10 ms");
     
     // Get the actual payload size from the camera
-    var device = camera.GetDevice();
     int payloadSize;
     try
     {
-        payloadSize = (int)device.GetIntegerFeature("PayloadSize");
+        payloadSize = (int)camera.GetPayloadSize();
         Console.WriteLine($"Payload size: {payloadSize} bytes");
     }
     catch
     {
-        // Fallback if PayloadSize not available
-        payloadSize = width * height * 2;
-        Console.WriteLine($"Using calculated payload size: {payloadSize} bytes");
+        // Fallback: try device feature, then calculate
+        try
+        {
+            var device = camera.GetDevice();
+            payloadSize = (int)device.GetIntegerFeature("PayloadSize");
+            Console.WriteLine($"Payload size (from device): {payloadSize} bytes");
+        }
+        catch
+        {
+            payloadSize = width * height * 2;
+            Console.WriteLine($"Using calculated payload size: {payloadSize} bytes");
+        }
     }
     
     // Create stream
     Console.WriteLine("Creating stream...");
     using var stream = camera.CreateStream();
+
+    // --- GigE Vision: configure stream for reliable high-throughput transfer ---
+    if (camera.IsGigEVisionDevice())
+    {
+        stream.ConfigureGigEDefaults(socketBufferSizeMB: 4);
+        Console.WriteLine($"[GigE] Stream configured with {stream.GetSocketBufferSize()} byte socket buffer");
+    }
     
     // Allocate and push buffers (use exact payload size)
     const int numBuffers = 10; // More buffers for USB3
@@ -287,6 +327,28 @@ try
     Console.WriteLine($"  Completed Buffers: {completed}");
     Console.WriteLine($"  Failures: {failures}");
     Console.WriteLine($"  Underruns: {underruns}");
+
+    // GigE-specific statistics
+    if (camera.IsGigEVisionDevice())
+    {
+        try
+        {
+            var (port, resent, missing) = stream.GetGigEStatistics();
+            Console.WriteLine($"\n[GigE] Stream Statistics:");
+            Console.WriteLine($"  Stream port: {port}");
+            Console.WriteLine($"  Resent packets: {resent}");
+            Console.WriteLine($"  Missing packets: {missing}");
+            if (missing > 0)
+            {
+                Console.WriteLine("\n[GigE] Packet loss detected! Try:");
+                Console.WriteLine("  1. Check Windows Firewall - allow the application through");
+                Console.WriteLine("  2. Enable Jumbo Frames on your NIC (9000+ MTU)");
+                Console.WriteLine("  3. Disable any VPN or network filtering software");
+                Console.WriteLine("  4. Connect camera directly to NIC (avoid switches)");
+            }
+        }
+        catch { }
+    }
     
     Console.WriteLine("\nAcquisition completed!");
     Console.WriteLine("\nNote: If you see 'Missing_packets' errors, you may need:");
