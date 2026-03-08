@@ -98,30 +98,26 @@ public class NodeMap : IDisposable
             
             var featuresPtr = AravisNative.arv_gc_category_get_features(categoryPtr);
             if (featuresPtr == IntPtr.Zero) return features;
-            
-            // GSList iteration
+
+            // arv_gc_category_get_features returns a GSList of const char* (feature name strings),
+            // NOT GObject/ArvGcFeatureNode pointers. Each data field is a UTF-8 feature name.
             var current = featuresPtr;
             while (current != IntPtr.Zero)
             {
-                var nodePtr = Marshal.ReadIntPtr(current, 0); // data field
-                if (nodePtr != IntPtr.Zero)
+                var nameStringPtr = Marshal.ReadIntPtr(current, 0); // data = const char*
+                if (nameStringPtr != IntPtr.Zero)
                 {
-                    var namePtr = AravisNative.arv_gc_feature_node_get_name(nodePtr);
-                    if (namePtr != IntPtr.Zero)
+                    var name = Marshal.PtrToStringAnsi(nameStringPtr);
+                    if (name != null)
                     {
-                        var name = Marshal.PtrToStringAnsi(namePtr);
-                        if (name != null)
+                        var details = GetFeatureDetails(name);
+                        if (details != null && details.IsImplemented)
                         {
-                            var details = GetFeatureDetails(name);
-                            if (details != null && details.IsImplemented)
-                            {
-                                features.Add(details);
-                            }
+                            features.Add(details);
                         }
                     }
                 }
-                
-                // Move to next in list
+
                 current = Marshal.ReadIntPtr(current, IntPtr.Size); // next field
             }
         }

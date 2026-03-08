@@ -30,6 +30,13 @@ public static class GLibNative
     [DllImport(GObjectLibraryName, CallingConvention = CallingConvention.Cdecl)]
     public static extern IntPtr g_type_name_from_instance(IntPtr instance);
 
+    /// <summary>
+    /// Checks if a GObject instance is an instance of a given type or a subtype of it.
+    /// Equivalent to G_TYPE_CHECK_INSTANCE_TYPE(instance, type).
+    /// </summary>
+    [DllImport(GObjectLibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern bool g_type_check_instance_is_a(IntPtr instance, IntPtr iface_type);
+
     // --- GLib (libglib-2.0) ---
 
     [DllImport(GLibLibraryName, CallingConvention = CallingConvention.Cdecl)]

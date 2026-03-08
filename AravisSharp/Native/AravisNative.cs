@@ -424,6 +424,10 @@ public static class AravisNative
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     public static extern IntPtr arv_gc_feature_node_get_tooltip(IntPtr node);
 
+    /// <summary>Returns the GType for ArvGcFeatureNode. Used for safe type checking before calling feature-node-specific functions.</summary>
+    [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern IntPtr arv_gc_feature_node_get_type();
+
     [DllImport(LibraryName, CallingConvention = CallingConvention.Cdecl)]
     public static extern IntPtr arv_gc_feature_node_get_value_as_string(IntPtr node, out IntPtr error);
 

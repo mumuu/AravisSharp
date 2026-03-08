@@ -215,6 +215,9 @@ public class Stream : IDisposable
                     var bufferHandle = AravisNative.arv_stream_timeout_pop_buffer(_handle, timeoutMs * 1000);
                     if (bufferHandle == IntPtr.Zero)
                         break; // No more buffers
+                    // Release ownership of the buffer popped from the output queue.
+                    // arv_stream_timeout_pop_buffer transfers ownership to the caller.
+                    GLibNative.g_object_unref(bufferHandle);
                 }
                 
                 GLibNative.g_object_unref(_handle);
