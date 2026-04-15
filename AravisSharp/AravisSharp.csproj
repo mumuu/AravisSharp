@@ -14,7 +14,7 @@
         
         <!-- Enable runtime-specific builds for NuGet package -->
         <RuntimeIdentifiers>linux-x64;linux-arm64;win-x64;osx-x64</RuntimeIdentifiers>
-        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+        <TargetFramework>net9.0</TargetFramework>
         
         <!-- Library package metadata -->
         <PackageId>AravisSharp</PackageId>
