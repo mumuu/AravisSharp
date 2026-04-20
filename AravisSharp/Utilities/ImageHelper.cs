@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using AravisSharp.Native;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
