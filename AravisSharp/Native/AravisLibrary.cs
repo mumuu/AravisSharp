@@ -61,7 +61,12 @@ public static class AravisLibrary
         }
 
         // 2. Probe runtimes/{rid}/native/ relative to the assembly location
-        var assemblyDir = Path.GetDirectoryName(typeof(AravisLibrary).Assembly.Location);
+        // Use AppContext.BaseDirectory for single-file app compatibility
+        var assemblyLocation = typeof(AravisLibrary).Assembly.Location;
+        var assemblyDir = !string.IsNullOrEmpty(assemblyLocation) 
+            ? Path.GetDirectoryName(assemblyLocation) 
+            : AppContext.BaseDirectory;
+        
         if (assemblyDir is not null)
         {
             var rid = GetRuntimeIdentifier();
